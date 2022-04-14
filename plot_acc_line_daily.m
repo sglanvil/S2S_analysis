@@ -57,20 +57,27 @@ for isim=1:length(simList)
         axis([0 46 0 0.8]);
 end
 
-atm_gm=ACCgm_save(4,:)-ACCgm_save(1,:); % trALL - climoATM
-ocn_gm=ACCgm_save(4,:)-ACCgm_save(3,:); % trALL - climoOCN
-atm_nam=ACCnam_save(4,:)-ACCnam_save(1,:); % trALL - climoATM
-ocn_nam=ACCnam_save(4,:)-ACCnam_save(3,:); % trALL - climoOCN
+atm_gm=ACCgm_save(4,:)-ACCgm_save(1,:); % fullALL - climoATM
+ocnatm_gm=ACCgm_save(4,:)-ACCgm_save(2,:); % fullALL - climoOCNclimoATM
+ocn_gm=ACCgm_save(4,:)-ACCgm_save(3,:); % fullALL - climoOCN
+
+atm_nam=ACCnam_save(4,:)-ACCnam_save(1,:); % fullALL - climoATM
+ocnatm_nam=ACCnam_save(4,:)-ACCnam_save(2,:); % fullALL - climoOCNclimoATM
+ocn_nam=ACCnam_save(4,:)-ACCnam_save(3,:); % fullALL - climoOCN
 
 subplot('position',subpos(1,:));
     plot(1:45,atm_gm,'color',lineColor(1,:),'linewidth',2,'linestyle','--');
+    plot(1:45,ocnatm_gm,'color',lineColor(2,:),'linewidth',2,'linestyle','--');
     plot(1:45,ocn_gm,'color',lineColor(3,:),'linewidth',2,'linestyle','--');
 
 subplot('position',subpos(2,:));
     plot(1:45,atm_nam,'color',lineColor(1,:),'linewidth',2,'linestyle','--');
+    plot(1:45,ocnatm_nam,'color',lineColor(2,:),'linewidth',2,'linestyle','--');
     plot(1:45,ocn_nam,'color',lineColor(3,:),'linewidth',2,'linestyle','--');
     
-    
-legend('climoATM','climoOCNclimoATM','climoOCN','trALL','trALL-climoATM','trALL-climoOCN');
+legend('climoATM','climoOCNclimoATM','climoOCN','fullALL',...
+    'fullALL-climoATM','fullALL-climoOCNclimoATM','fullALL-climoOCN',...
+    'Position',[0.2 0.2 0.1 0.2])
+
 print(printName,'-r300','-dpng');
 
