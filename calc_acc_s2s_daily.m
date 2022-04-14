@@ -1,6 +1,7 @@
-clear; clc; close all;
+% April 14, 2022
 % NOTES: currently we cutoff at 2015 or 2009
 % NOTES: precip in obs is for mm/day while it is in mm/s in model
+clear; clc; close all;
 
 % ------------------------- SPECIFY BELOW -------------------------
 varName='tas_2m';
