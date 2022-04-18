@@ -12,12 +12,6 @@ timeAvg='daily';
 printName='/glade/work/sglanvil/CCR/S2S/figures/tas_2m_ACC_line_DJF_daily';
 % ------------------------- SPECIFY ABOVE -------------------------
 
-subpos=[0.12 0.55 0.35 0.35; 0.58 0.55 0.35 0.35; ...
-    0.12 0.1 0.35 0.35; 0.58 0.1 0.35 0.35];
-
-% yellow, purple, blue, black
-lineColor=[255 165 0; 148 0 211; 0 0 205; 0 0 0]./255;
-figure
 for isim=1:length(simList)
     simName=simList{isim};
     accFile=sprintf('/glade/work/sglanvil/CCR/S2S/data/%s_ACC_%sseason_%s_%s_s2s_data.nc',...
@@ -42,42 +36,80 @@ for isim=1:length(simList)
     end
     ACCgm_save(isim,:)=ACCgm_cosine;
     ACCnam_save(isim,:)=ACCnam_cosine;
-    subplot('position',subpos(1,:));
-        hold on; grid on; box on;
-        plot(1:45,ACCgm_cosine,'color',lineColor(isim,:),'linewidth',2);
-        title('DJF Global Land');
-        ylabel('ACC','fontweight','bold');
-        xlabel('time (days)','fontweight','bold');
-        axis([0 46 0 0.8]);
-    subplot('position',subpos(2,:));
-        hold on; grid on; box on;
-        plot(1:45,ACCnam_cosine,'color',lineColor(isim,:),'linewidth',2);
-        title('DJF North America Land');
-        xlabel('time (days)','fontweight','bold');
-        axis([0 46 0 0.8]);
 end
+
+subpos=[0.12 0.55 0.35 0.35; 0.58 0.55 0.35 0.35; ...
+    0.12 0.1 0.35 0.35; 0.58 0.1 0.35 0.35];
+lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0]./255;
+figure
+subplot('position',subpos(1,:));
+    hold on; grid on; box on;
+    plot(1:45,ACCgm_save(1,:),'color',lineColor(1,:),'linewidth',2);
+    plot(1:45,ACCgm_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCgm_save(2,:),'color',lineColor(2,:),'linewidth',2);
+    plot(1:45,ACCgm_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCgm_save(3,:),'color',lineColor(3,:),'linewidth',2);
+    plot(1:45,ACCgm_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCgm_save(4,:),'color',lineColor(4,:),'linewidth',2);
+    title('DJF Global Land');
+    ylabel('ACC','fontweight','bold');
+    axis([0 46 0 0.8]);
+    set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+        
+subplot('position',subpos(2,:));
+    hold on; grid on; box on;
+    plot(1:45,ACCnam_save(1,:),'color',lineColor(1,:),'linewidth',2);
+    plot(1:45,ACCnam_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCnam_save(2,:),'color',lineColor(2,:),'linewidth',2);
+    plot(1:45,ACCnam_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCnam_save(3,:),'color',lineColor(3,:),'linewidth',2);
+    plot(1:45,ACCnam_save(1,:)*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCnam_save(4,:),'color',lineColor(4,:),'linewidth',2);
+    title('DJF North America Land');
+    axis([0 46 0 0.8]);
+    set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+    
+legend('\bfclimoATM','(OCN+LND Predictability)','\bfclimoOCNclimoATM','(LND Predictability)',...
+    '\bfclimoOCN','(ATM+LND Predictability)','\bffullALL','box','off','location','best','fontsize',8);
 
 atm_gm=ACCgm_save(4,:)-ACCgm_save(1,:); % fullALL - climoATM
 ocnatm_gm=ACCgm_save(4,:)-ACCgm_save(2,:); % fullALL - climoOCNclimoATM
 ocn_gm=ACCgm_save(4,:)-ACCgm_save(3,:); % fullALL - climoOCN
+sum_gm=atm_gm+ocn_gm+ACCgm_save(2,:);
 
 atm_nam=ACCnam_save(4,:)-ACCnam_save(1,:); % fullALL - climoATM
 ocnatm_nam=ACCnam_save(4,:)-ACCnam_save(2,:); % fullALL - climoOCNclimoATM
 ocn_nam=ACCnam_save(4,:)-ACCnam_save(3,:); % fullALL - climoOCN
+sum_nam=atm_nam+ocn_nam+ACCnam_save(2,:);
 
-subplot('position',subpos(1,:));
-    plot(1:45,atm_gm,'color',lineColor(1,:),'linewidth',2,'linestyle','--');
-    plot(1:45,ocnatm_gm,'color',lineColor(2,:),'linewidth',2,'linestyle','--');
-    plot(1:45,ocn_gm,'color',lineColor(3,:),'linewidth',2,'linestyle','--');
+subplot('position',subpos(3,:));
+    hold on; grid on; box on;
+    plot(1:45,atm_gm,'color',lineColor(1,:),'linewidth',2);
+    plot(1:45,ACCgm_save(2,:),'color',lineColor(2,:),'linewidth',2);
+    plot(1:45,ocn_gm,'color',lineColor(3,:),'linewidth',2);
+    plot(1:45,sum_gm,'color',lineColor(4,:),'linewidth',2);
+    ylabel('ACC','fontweight','bold');
+    xlabel('Week','fontweight','bold');
+    axis([0 46 0 0.8]);
+    set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+        
+subplot('position',subpos(4,:));
+    hold on; grid on; box on;
+    plot(1:45,atm_nam,'color',lineColor(1,:),'linewidth',2);
+    plot(1:45,atm_nam*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ACCnam_save(2,:),'color',lineColor(2,:),'linewidth',2);
+    plot(1:45,atm_nam*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,ocn_nam,'color',lineColor(3,:),'linewidth',2);
+    plot(1:45,atm_nam*-200,'color',[1 1 1]); % INVISIBLE LINE
+    plot(1:45,sum_nam,'color',lineColor(4,:),'linewidth',2);
+    xlabel('Week','fontweight','bold');
+    axis([0 46 0 0.8]);
+    set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+        
+% legend({['fullALL-climoATM' newline 'ATM'],['climoOCNclimoATM' newline 'LND'],...
+%     ['fullALL-climoOCN' newline 'OCN'],'sum'},'box','off');
+legend('\bffullALL-climoATM','(ATM Predictability)','\bfclimoOCNclimoATM','(LND Predictability)',...
+    '\bffullALL-climoOCN','(OCN Predictability)','\bfsum','box','off','location','best','fontsize',8);
 
-subplot('position',subpos(2,:));
-    plot(1:45,atm_nam,'color',lineColor(1,:),'linewidth',2,'linestyle','--');
-    plot(1:45,ocnatm_nam,'color',lineColor(2,:),'linewidth',2,'linestyle','--');
-    plot(1:45,ocn_nam,'color',lineColor(3,:),'linewidth',2,'linestyle','--');
-    
-legend('climoATM','climoOCNclimoATM','climoOCN','fullALL',...
-    'fullALL-climoATM','fullALL-climoOCNclimoATM','fullALL-climoOCN',...
-    'Position',[0.2 0.2 0.1 0.2])
-
-print(printName,'-r300','-dpng');
+print(printName,'-r250','-dpng');
 
