@@ -30,7 +30,7 @@ y=[10 10 55 55];
 patch(x,y,'blue','facealpha',0.25,'linestyle','-');
 
 % Europe
-x=[-10 40 40 -10];
+x=[-10 60 60 -10];
 y=[35 35 75 75];
 patch(x,y,'blue','facealpha',0.25,'linestyle','-');
 
