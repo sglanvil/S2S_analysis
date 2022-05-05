@@ -20,8 +20,8 @@ y=[15 15 75 75];
 patch(x,y,'blue','facealpha',0.25,'linestyle','-');
 
 % South America 
-x=[-85 -35 -35 -85]; 
-y=[-20 -20 10 10];
+x=[-85 -30 -30 -85]; 
+y=[-20 -20 15 15];
 patch(x,y,'blue','facealpha',0.25,'linestyle','-');
 
 % Asia
