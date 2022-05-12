@@ -2,30 +2,22 @@
 
 clear; clc; close all;
 
-% actual/full forecast (2 vars, 4 seasons/plots, 7 zones/subplots in each, 2 styes (actual vs inferred))
-
-% inferred/sum ACC (4 plots, 7 zones/subplots in each)
-% atm_gm=ACCgm_save(4,:)-ACCgm_save(1,:); % fullALL - climoATM
-% ocn_gm=ACCgm_save(4,:)-ACCgm_save(3,:); % fullALL - climoOCN
-% sum_gm=atm_gm+ocn_gm+ACCgm_save(2,:);
-
-% DJF: zones 1 2 3 4 5 6 global
-% MAM: zones 1 2 3 4 5 6 global
-% JJA: zones 1 2 3 4 5 6 global
-% SON: zones 1 2 3 4 5 6 global
-
+% 4 seasons/plots, 7 zones/subplots in each
+% 2 styles (actual vs inferred)
+% 2 variables (tas_2m and pr_sfc)
+% --> 8 figures per variables
 
 % ------------------------- SPECIFY BELOW -------------------------
 var='tas_2m';
-season='SON';
+season='JJA';
+titleName=sprintf('Inferred %s 2m Temperature ACC',season);
+printName=sprintf('%s_ACC_line_daily_%s_ALLzones_inferred',var,season);
 % ------------------------- SPECIFY ABOVE -------------------------
 
 simList={'cesm2cam6climoATMv2','cesm2cam6climoOCNclimoATMv2',...
     'cesm2cam6climoOCNv2','cesm2cam6v2'};
 lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0]./255; % sim color
 timeAvg='daily';
-printName=sprintf('%s_ACC_line_daily_%s_ALLzones',var,season);
-titleName=sprintf('%s 2m Temperature ACC',season);
 
 zoneA={'lon>190 & lon<305','lat>15 & lat<75'}; % North America (lon>190 & lon<305,lat>15 & lat<75)
 zoneB={'lon>275 & lon<330','lat>-20 & lat<15'}; % South America (lon>275 & lon<330,lat>-20 & lat<15)
@@ -62,17 +54,44 @@ for izone=1:7
             ACCzone_cosine(itime)=sum(sum(cosmatzone.*ACCzone,1,'omitnan'),2,'omitnan')...
                 /sum(sum(cosmatzone,1,'omitnan'),2,'omitnan');
         end
-        subplot('position',subpos(izone,:))
-        hold on; grid on; box on;
-        plot(1:45,ACCzone_cosine,'color',lineColor(isim,:),'linewidth',1.5)
-        xlabel('Week');
-        title(zoneName{izone});
-        axis([0 46 0 1]);
-        set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+        ACCsave(izone,isim,:)=ACCzone_cosine;
+        % ----------------- ACTUAL -----------------
+%         subplot('position',subpos(izone,:))
+%         hold on; grid on; box on;
+%         plot(1:45,ACCzone_cosine,'color',lineColor(isim,:),'linewidth',1.5)
+%         xlabel('Week');
+%         title(zoneName{izone});
+%         axis([0 46 0 1]);
+%         set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+%         set(gca,'ytick',0:0.2:1);
+        % ---------------------------------------------
     end
 end
 
-% Fake Plot (to make lengend)
+% ----------------- INFERRED -----------------
+atm=squeeze(ACCsave(:,4,:)-ACCsave(:,1,:)); % full-climoATM
+lnd=squeeze(ACCsave(:,2,:)); % climoOCNclimoATM
+ocn=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % full-climoOCN
+sum=squeeze(atm+lnd+ocn); % atm+ocn+land
+full=squeeze(ACCsave(:,4,:)); % full
+for izone=1:7
+    subplot('position',subpos(izone,:))
+    hold on; grid on; box on;
+    plot(1:45,atm(izone,:),'color',lineColor(1,:),'linewidth',1.5)
+    plot(1:45,lnd(izone,:),'color',lineColor(2,:),'linewidth',1.5)
+    plot(1:45,ocn(izone,:),'color',lineColor(3,:),'linewidth',1.5)
+    plot(1:45,sum(izone,:),'color',lineColor(4,:),'linewidth',1.5)
+    plot(1:45,full(izone,:),'color',lineColor(4,:),'linewidth',1.5,'linestyle','--')
+    xlabel('Week');
+    title(zoneName{izone});
+    axis([0 46 0 1]);
+    set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+    set(gca,'ytick',0:0.2:1);
+end
+% ---------------------------------------------
+
+
+% ----------------- FAKE PLOT (for legend) -----------------
 p(1)=plot([1 45],[-100 -100],'color',lineColor(1,:),'linewidth',2);
 p(2)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(3)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2); 
@@ -80,10 +99,19 @@ p(4)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(5)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
 p(6)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(7)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
-legend(p,'\bfclimoATM','(OCN+LND Predictability)',...
+p(8)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2,'linestyle','--');
+% ----------------- ACTUAL -----------------
+% legend(p,'\bfclimoATM','(OCN+LND Predictability)',...
+%     '\bfclimoOCNclimoATM','(LND Predictability)',...
+%     '\bfclimoOCN','(ATM+LND Predictability)',...
+%     '\bffullALL','box','off','position',[.77 .25 .2 .2]);
+
+% ----------------- INFERRED -----------------
+legend(p,'\bffullALL-climoATM','(ATM Predictability)',...
     '\bfclimoOCNclimoATM','(LND Predictability)',...
-    '\bfclimoOCN','(ATM+LND Predictability)',...
-    '\bffullALL','box','off','position',[.77 .25 .2 .2]);
+    '\bffullALL-climoOCN','(OCN Predictability)',...
+    '\bfsum','\bffullALL','box','off','position',[.77 .25 .2 .2]);
 
 sgtitle(titleName,'fontweight','bold') 
 print(printName,'-r300','-dpng');
+
