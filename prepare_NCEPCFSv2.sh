@@ -8,7 +8,7 @@ module load ncl
 #       cp /glade/collections/rda/data/ds094.0/$iyear/*.pgrbf.* /glade/scratch/sglanvil/NCEPCFSv2/ 
 #done
 
-## untar files (just using forecast = 06 hours)
+## untar files (just forecast = 06 hour)
 for ifile in /glade/scratch/sglanvil/NCEPCFSv2/*.tar; do
         idate=$(sed -e 's/.*cdas1\.//' <<< $ifile | sed -e 's/\.pgrbf\.tar//')
         echo $idate
