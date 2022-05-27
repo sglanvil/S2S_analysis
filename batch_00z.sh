@@ -22,3 +22,6 @@ for ifile in *00.grb2; do
         fi
 done
 
+# update job name and ifile *00 loop to change from (00,06,12,18)
+# location: /glade/scratch/sglanvil/NCEPCFSR/
+# submit with command, on Cheyenne: qsubcasper batch_00z.sh
