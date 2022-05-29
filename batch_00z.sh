@@ -17,8 +17,12 @@ for ifile in *00.grb2; do
         if [ ! -f $iname.nc ]; then
                 echo "file does not exist yet"
                 ncl_convert2nc $ifile
-        else
-                echo "file exists"
+        fi
+        size=$(du -shb "$iname.nc" | cut -f1)
+        if [ $size -lt 655000000 ]; then
+                echo "file size too small"
+                rm $iname.nc
+                ncl_convert2nc $ifile
         fi
 done
 
