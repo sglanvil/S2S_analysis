@@ -43,6 +43,9 @@ while [[ $date -le $endDate ]]; do
                 ncks -O -v TMP_P0_L103_GLL0,lat_0,lon_0 cdas1.pgrbf06.${date}.dailyAvg.nc tas_2m_NCEPCFSv2.${date}.dailyAvg.nc
                 # ----- Surface Total Precipiation Rate (lon, lat) = PRATE_P8_L1_GLL0_avg (kg/m2/s)
                 ncks -O -v PRATE_P8_L1_GLL0_avg,lat_0,lon_0 cdas1.pgrbf06.${date}.dailyAvg.nc pr_sfc_NCEPCFSv2.${date}.dailyAvg.nc
+                size_pr_sfc=$(du -shb pr_sfc_NCEPCFSv2.${date}.dailyAvg.nc | cut -f1)
+                size_tas_2m=$(du -shb tas_2m_NCEPCFSv2.${date}.dailyAvg.nc | cut -f1)
+                size_T=$(du -shb T_NCEPCFSv2.${date}.dailyAvg.nc | cut -f1)
         fi
 
         # if the sizes are off, recreate all files
