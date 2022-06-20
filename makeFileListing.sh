@@ -27,7 +27,7 @@ for icounter in {0..4}; do # ---------------- Loop through all 5 experiments
         inputDir=${dirArray[$icounter]}
         echo $imodel
         echo $inputDir
-        for ivar in tas_2m; do # ------------ Choose variables (tas_2m, pr_sfc, T, etc.)
+        for ivar in tas_2m; do # ------------ Specify variables (tas_2m pr_sfc T)
                 echo $ivar
                 finalFile=$ivar.S2S.$imodel.$iscenario
                 echo $finalFile
