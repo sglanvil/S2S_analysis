@@ -17,7 +17,8 @@ dirArray=(/glade/campaign/cesm/development/cross-wg/S2S/CESM2/S2SHINDCASTS/ \
 # (2) 10 members, 1999-2008 (10 years) = scenario2
 # (3) 5 members, 1999-2019 (21 years)  = scenario3
 # (4) 5 members, 1999-2008 (10 years)  = scenario4
-iscenario=scenario3
+
+iscenario=standard
 
 for icounter in {0..4}; do
         echo $icounter
@@ -30,6 +31,38 @@ for icounter in {0..4}; do
                 finalFile=$ivar.S2S.$imodel.$iscenario
                 echo $finalFile
                 rm $finalFile
-                find $inputDir -print | grep "\/$ivar\/" | grep "0[0-4]\.nc$" | sort > $finalFile
+                if [[ $iscenario == standard ]]; then
+                        echo standard
+                        find $inputDir -print | grep "\/$ivar\/" | grep "0[0-9]\.nc$" | sort > $finalFile
+                        sed -i '/202[0,1,2]/d' $finalFile
+                fi
+                if [[ $iscenario == scenario2 ]]; then
+                        echo scenario2
+                        find $inputDir -print | grep "\/$ivar\/" | grep "0[0-9]\.nc$" | sort > $finalFile
+                        sed -i '/2009/d' $finalFile
+                        sed -i '/201[0-9]/d' $finalFile
+                        sed -i '/202[0-2]/d' $finalFile
+                fi
+                if [[ $iscenario == scenario3 ]]; then
+                        echo scenario3
+                        find $inputDir -print | grep "\/$ivar\/" | grep "0[0-4]\.nc$" | sort > $finalFile
+                        sed -i '/202[0,1,2]/d' $finalFile
+                fi
+                if [[ $iscenario == scenario4 ]]; then
+                        echo scenario4
+                        find $inputDir -print | grep "\/$ivar\/" | grep "0[0-4]\.nc$" | sort > $finalFile
+                        sed -i '/2009/d' $finalFile
+                        sed -i '/201[0-9]/d' $finalFile
+                        sed -i '/202[0-2]/d' $finalFile
+                fi
         done
 done
+
+#imodel=cesm2cam6v2
+#inputDir=/glade/campaign/cesm/development/cross-wg/S2S/CESM2/S2SHINDCASTS/
+
+#imodel=70Lwaccm6
+#inputDir=/gpfs/csfs1/cesm/collections/S2Sfcst/POSTPROC/
+
+
+
