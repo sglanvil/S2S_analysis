@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# ------------------ USER SPECIFY ------------------
+iscenario=standard 
+# choose: standard, scenario2, scenario3, or scenario4
+# --------------------------------------------------
+# (1) 10 members, 1999-2019 (21 years) = standard
+# (2) 10 members, 1999-2008 (10 years) = scenario2
+# (3) 5 members, 1999-2019 (21 years)  = scenario3
+# (4) 5 members, 1999-2008 (10 years)  = scenario4
+
 caseArray=(cesm2cam6v2 \
 cesm2cam6climoATMv2 \
 cesm2cam6climoLNDv2 \
@@ -12,21 +21,13 @@ dirArray=(/glade/campaign/cesm/development/cross-wg/S2S/CESM2/S2SHINDCASTS/ \
 /glade/campaign/cesm/development/cross-wg/S2S/CESM2/S2SHINDCASTSclimoOCN/postprocess/ \
 /glade/campaign/cesm/development/cross-wg/S2S/CESM2/S2SHINDCASTSclimoOCNclimoATM/postprocess/)
 
-# --------------------- define scenario ---------------------
-# (1) 10 members, 1999-2019 (21 years) = standard
-# (2) 10 members, 1999-2008 (10 years) = scenario2
-# (3) 5 members, 1999-2019 (21 years)  = scenario3
-# (4) 5 members, 1999-2008 (10 years)  = scenario4
-
-iscenario=standard
-
-for icounter in {0..4}; do
+for icounter in {0..4}; do # ---------------- Loop through all 5 experiments
         echo $icounter
         imodel=${caseArray[$icounter]}
         inputDir=${dirArray[$icounter]}
         echo $imodel
         echo $inputDir
-        for ivar in tas_2m; do
+        for ivar in tas_2m; do # ------------ Choose variables (tas_2m, pr_sfc, T, etc.)
                 echo $ivar
                 finalFile=$ivar.S2S.$imodel.$iscenario
                 echo $finalFile
