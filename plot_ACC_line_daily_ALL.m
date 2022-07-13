@@ -8,13 +8,15 @@ clear; clc; close all;
 
 % ------------------------- SPECIFY BELOW -------------------------
 var='tas_2m';
-season='SON';
-titleName=sprintf('%s Surface Temperature ACC',season);
-printName=sprintf('%s_ACC_line_daily_%s_ALLzones_inferred',var,season);
+season='DJF';
+scenarioName='scenario4';
+titleName=sprintf('%s Surface Temperature ACC (%s)',season,scenarioName);
+printName=sprintf('/glade/work/sglanvil/CCR/S2S/figures/%s_ACC_line_daily_%s_ALLzones_%s',...
+    var,season,scenarioName);
 % ------------------------- SPECIFY ABOVE -------------------------
 
-simList={'cesm2cam6climoATMv2','cesm2cam6climoOCNclimoATMv2',...
-    'cesm2cam6climoOCNv2','cesm2cam6v2'};
+simList={'cesm2cam6climoATMv2','cesm2cam6climoLNDv2',...
+    'cesm2cam6climoOCNv2','cesm2cam6v2','cesm2cam6climoOCNclimoATMv2'};
 lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0]./255; % sim color
 timeAvg='daily';
 
@@ -35,8 +37,8 @@ subpos=[0.05 0.6 0.2 0.2; 0.05 0.25 0.2 0.2; ...
 for izone=1:7
     for isim=1:length(simList)
         simName=simList{isim};
-        accFile=sprintf('%s_ACC_%sseason_%s_%s_s2s_data.nc',...
-            var,season,timeAvg,simName);
+        accFile=sprintf('/glade/campaign/cesm/development/cross-wg/S2S/sglanvil/data/%s_ACC_%sseason_%s_%s.%s_s2s_data.nc',...
+            var,season,timeAvg,simName,scenarioName);
         lon=ncread(accFile,'lon');
         lat=ncread(accFile,'lat');
         acc=ncread(accFile,'ACC');
@@ -58,6 +60,8 @@ for izone=1:7
 %         subplot('position',subpos(izone,:))
 %         hold on; grid on; box on;
 %         plot(1:45,ACCzone_cosine,'color',lineColor(isim,:),'linewidth',1.5)
+%         area(1:45,ACCzone_cosine,'edgecolor',lineColor(isim,:),...
+%             'facecolor',lineColor(isim,:),'facealpha',0.15','linewidth',1.5)
 %         xlabel('Week');
 %         title(zoneName{izone});
 %         axis([0 46 0 1]);
@@ -67,23 +71,33 @@ for izone=1:7
     end
 end
 
+
+
 % ----------------- INFERRED -----------------
 atm=squeeze(ACCsave(:,4,:)-ACCsave(:,1,:)); % standard-climoATM
-lnd=squeeze(ACCsave(:,2,:)); % climoOCNclimoATM
+lnd=squeeze(ACCsave(:,4,:)-ACCsave(:,2,:)); % standard-climoLND
 ocn=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % standard-climoOCN
 sum=squeeze(atm+lnd+ocn); % atm+ocn+land
 standard=squeeze(ACCsave(:,4,:)); % standard
+ocnatm=squeeze(ACCsave(:,5,:));
 for izone=1:7
     subplot('position',subpos(izone,:))
     hold on; grid on; box on;
-    plot(1:45,atm(izone,:),'color',lineColor(1,:),'linewidth',1.5)
-    plot(1:45,lnd(izone,:),'color',lineColor(2,:),'linewidth',1.5)
-    plot(1:45,ocn(izone,:),'color',lineColor(3,:),'linewidth',1.5)
-    plot(1:45,sum(izone,:),'color',lineColor(4,:),'linewidth',1.5)
+    area([14 28],[1 1],'edgecolor','none','facecolor',[128 0 0]/255,...
+        'facealpha',0.05);
+    area(1:45,sum(izone,:),'edgecolor',lineColor(4,:),'facecolor',lineColor(4,:),...
+        'facealpha',0.05,'linewidth',1.5); 
+    area(1:45,lnd(izone,:),'edgecolor',lineColor(2,:),'facecolor',lineColor(2,:),...
+        'facealpha',0.2,'linewidth',1.5);        
+    area(1:45,atm(izone,:),'edgecolor',lineColor(1,:),'facecolor',lineColor(1,:),...
+        'facealpha',0.2,'linewidth',1.5);
+    area(1:45,ocn(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
+        'facealpha',0.2,'linewidth',1.5);    
     plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',2.5,'linestyle',':')
+    plot(1:45,ocnatm(izone,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle',':')
     xlabel('Week');
     title(zoneName{izone});
-    axis([0 46 0 1]);
+    axis([1.01 45 -0.1 1]); % do x=1.01 because "area" function plots y=0 at beginning
     set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
     set(gca,'ytick',0:0.2:1);
 end
@@ -99,17 +113,20 @@ p(5)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
 p(6)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(7)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
 p(8)=plot([1 45],[-100 -100],'color',[.5 .5 .5],'linewidth',2,'linestyle',':');
+p(9)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2,'linestyle',':');
+p(10)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 % ----------------- ACTUAL -----------------
 % legend(p,'\bfclimoATM','(OCN+LND Predictability)',...
 %     '\bfclimoOCNclimoATM','(LND Predictability)',...
 %     '\bfclimoOCN','(ATM+LND Predictability)',...
 %     '\bfstandard','box','off','position',[.77 .25 .2 .2]);
-
 % ----------------- INFERRED -----------------
-legend(p,'\bfstandard-climoATM','(ATM Predictability)',...
-    '\bfclimoOCNclimoATM','(LND Predictability)',...
-    '\bfstandard-climoOCN','(OCN Predictability)',...
-    '\bfsum','\bfstandard','box','off','position',[.77 .25 .2 .2]);
+legend(p,'\bfstandard-climoATM','(ATMvar Pred)',...
+    '\bfstandard-climoLND','(LNDvar Pred)',...
+    '\bfstandard-climoOCN','(OCNvar Pred)',...
+    '\bfsum','\bfstandard',...
+    '\bfclimoOCNclimoATM','(LNDclim+LNDvar Pred)',...
+    'box','off','position',[.77 .25 .2 .2]);
 
 sgtitle(titleName,'fontweight','bold') 
 print(printName,'-r300','-dpng');
