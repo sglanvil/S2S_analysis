@@ -2,8 +2,10 @@ clear; clc; close all;
 
 % ------------------------- SPECIFY BELOW -------------------------
 varName='tas_2m';
-caseList={'cesm2cam6v2','cesm2cam6climoATMv2','cesm2cam6climoLNDv2',...
-    'cesm2cam6climoOCNv2','cesm2cam6climoOCNclimoATMv2'};
+caseList={'cesm2cam6v2',...
+    'cesm2cam6climoATMv2','cesm2cam6climoLNDv2','cesm2cam6climoOCNv2',...
+    'cesm2cam6climoOCNclimoATMv2','cesm2cam6climoOCNclimoLNDv2',...
+    'cesm2cam6climoALLv2'};
 scenarioList={'scenario1','scenario2','scenario3','scenario4'};
 season='DJF';
 timeAvg='daily';
@@ -15,7 +17,7 @@ if strcmp(varName,'pr_sfc')==1
     divideObsBy=86400; % OBS (mm/day) vs MODEL (mm/s)
 end
 
-for iscenario=1:length(scenarioList)
+for iscenario=1 % 1:length(scenarioList)
     scenarioName=scenarioList{iscenario};
     for icase=1:length(caseList)
         caseName=caseList{icase};
