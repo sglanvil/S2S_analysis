@@ -9,14 +9,14 @@ clear; clc; close all;
 % ------------------------- SPECIFY BELOW -------------------------
 var='tas_2m';
 season='DJF';
-scenarioName='scenario4';
+scenarioName='scenario1';
 titleName=sprintf('%s Surface Temperature ACC (%s)',season,scenarioName);
 printName=sprintf('/glade/work/sglanvil/CCR/S2S/figures/%s_ACC_line_daily_%s_ALLzones_%s',...
     var,season,scenarioName);
 % ------------------------- SPECIFY ABOVE -------------------------
 
-simList={'cesm2cam6climoATMv2','cesm2cam6climoLNDv2',...
-    'cesm2cam6climoOCNv2','cesm2cam6v2','cesm2cam6climoOCNclimoATMv2'};
+simList={'cesm2cam6climoATMv2','cesm2cam6climoLNDv2','cesm2cam6climoOCNv2',...
+    'cesm2cam6v2','cesm2cam6climoOCNclimoATMv2','cesm2cam6climoATMclimoLNDv2'};
 lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0]./255; % sim color
 timeAvg='daily';
 
@@ -80,6 +80,8 @@ ocn=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % standard-climoOCN
 sum=squeeze(atm+lnd+ocn); % atm+ocn+land
 standard=squeeze(ACCsave(:,4,:)); % standard
 ocnatm=squeeze(ACCsave(:,5,:));
+atmlnd=squeeze(ACCsave(:,6,:));
+recreated=atm+ocnatm+ocn;
 for izone=1:7
     subplot('position',subpos(izone,:))
     hold on; grid on; box on;
@@ -93,8 +95,10 @@ for izone=1:7
         'facealpha',0.2,'linewidth',1.5);
     area(1:45,ocn(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
         'facealpha',0.2,'linewidth',1.5);    
-    plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',2.5,'linestyle',':')
     plot(1:45,ocnatm(izone,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle',':')
+    plot(1:45,atmlnd(izone,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle',':')
+    plot(1:45,recreated(izone,:),'color',lineColor(4,:),'linewidth',2.5,'linestyle',':')
+    plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',1.5)
     xlabel('Week');
     title(zoneName{izone});
     axis([1.01 45 -0.1 1]); % do x=1.01 because "area" function plots y=0 at beginning
@@ -112,21 +116,35 @@ p(4)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(5)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
 p(6)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(7)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
-p(8)=plot([1 45],[-100 -100],'color',[.5 .5 .5],'linewidth',2,'linestyle',':');
+p(8)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+
 p(9)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2,'linestyle',':');
 p(10)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(11)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2,'linestyle',':');
+p(12)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(13)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2,'linestyle',':');
+p(14)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(15)=plot([1 45],[-100 -100],'color',[.5 .5 .5],'linewidth',2);
+
 % ----------------- ACTUAL -----------------
 % legend(p,'\bfclimoATM','(OCN+LND Predictability)',...
 %     '\bfclimoOCNclimoATM','(LND Predictability)',...
 %     '\bfclimoOCN','(ATM+LND Predictability)',...
 %     '\bfstandard','box','off','position',[.77 .25 .2 .2]);
 % ----------------- INFERRED -----------------
-legend(p,'\bfstandard-climoATM','(ATMvar Pred)',...
-    '\bfstandard-climoLND','(LNDvar Pred)',...
-    '\bfstandard-climoOCN','(OCNvar Pred)',...
-    '\bfsum','\bfstandard',...
-    '\bfclimoOCNclimoATM','(LNDclim+LNDvar Pred)',...
-    'box','off','position',[.77 .25 .2 .2]);
+legend(p,'\bfstandard-climoATM','(ATMvar)',...
+    '\bfstandard-climoLND','(LNDvar)',...
+    '\bfstandard-climoOCN','(OCNvar)',...
+    '\bfsum of solid','(ALLvar)',...
+    '\bfclimoOCNclimoATM','(LNDclim+LNDvar+...)',... 
+    '\bfclimoATMclimoLND','(OCNclim+OCNvar+...)',... 
+    '\bfrecreated','(see side text)',...
+    '\bfstandard',... 
+    'box','off','position',[.77 .18 .2 .2]);
+
+annotation('textbox',[0.02,0.13,0,0],'string','recreated=(standard-climoATM)+(climoOCNclimoATM)+(standard-climoOCN)')
+annotation('textbox',[0.02,0.1,0,0],'string','recreated=(ATMvar)+(LNDclim+LNDvar+OCNclim+ATMclim)+(OCNvar)')
+annotation('textbox',[0.02,0.07,0,0],'string','recreated=(yellow\_solid)+(green\_dash)+(blue\_solid)')
 
 sgtitle(titleName,'fontweight','bold') 
 print(printName,'-r300','-dpng');
