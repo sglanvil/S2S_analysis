@@ -2,22 +2,25 @@
 
 clear; clc; close all;
 
-% 4 seasons/plots, 7 zones/subplots in each
-% 2 variables (tas_2m and pr_sfc)
-% --> 4 figures per variable
-
 % ------------------------- SPECIFY BELOW -------------------------
 var='tas_2m';
 season='DJF';
 scenarioName='scenario1';
-titleName=sprintf('%s Surface Temperature ACC (%s)',season,scenarioName);
+varOrFullOption='var';
+titleName=sprintf('%s Surface Temperature ACC',season);
 printName=sprintf('/glade/work/sglanvil/CCR/S2S/figures/%s_ACC_line_daily_%s_ALLzones_%s',...
-    var,season,scenarioName);
+    var,season,varOrFullOption);
 % ------------------------- SPECIFY ABOVE -------------------------
 
+% climoALLFIX --> climoALL
+% climoOCNFIXclimoLND --> climoOCNclimoLND (yellow dashed, has full atmosphere)
+% climoOCNclimoLND --> climoLND (can be deleted!)
+% climoALL --> climoATMclimoLND (blue dashed, has full ocean)
+
 simList={'cesm2cam6climoATMv2','cesm2cam6climoLNDv2','cesm2cam6climoOCNv2',...
-    'cesm2cam6v2','cesm2cam6climoOCNclimoATMv2','cesm2cam6climoATMclimoLNDv2'};
-lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0]./255; % sim color
+    'cesm2cam6v2','cesm2cam6climoOCNclimoATMv2','cesm2cam6climoALLv2',...
+    'cesm2cam6climoOCNFIXclimoLNDv2','cesm2cam6climoALLFIXv2' };
+lineColor=[255 165 0; 34 139 34; 0 0 205; 0 0 0; 255 0 0]./255; % sim color
 timeAvg='daily';
 
 zoneA={'lon>190 & lon<305','lat>15 & lat<75'}; % North America (lon>190 & lon<305,lat>15 & lat<75)
@@ -28,7 +31,7 @@ zoneE={'lon>60 & lon<145','lat>10 & lat<55'}; % Asia (lon>60 & lon<145,lat>10 & 
 zoneF={'lon>95 & lon<180','lat>-50 & lat<10'}; % Australia/SE Asia (lon>95 & lon<180,lat>-50 & lat<10)
 zoneG={'lon>0 & lon<360','lat>-90 & lat<90'};
 zoneList={zoneA zoneB zoneC zoneD zoneE zoneF zoneG};
-zoneName={'1. North America','2. South America','3. Europe','4. Africa','5. Asia','6. SE Asia/Australia','Global'};
+zoneName={'North America','South America','Europe','Africa','Asia','SE Asia/Australia','Global'};
 subpos=[0.05 0.6 0.2 0.2; 0.05 0.25 0.2 0.2; ...
         0.29 0.6 0.2 0.2; 0.29 0.25 0.2 0.2; ...
         0.53 0.6 0.2 0.2; 0.53 0.25 0.2 0.2; ...
@@ -56,49 +59,48 @@ for izone=1:7
                 /sum(sum(cosmatzone,1,'omitnan'),2,'omitnan');
         end
         ACCsave(izone,isim,:)=ACCzone_cosine;
-        % ----------------- ACTUAL -----------------
-%         subplot('position',subpos(izone,:))
-%         hold on; grid on; box on;
-%         plot(1:45,ACCzone_cosine,'color',lineColor(isim,:),'linewidth',1.5)
-%         area(1:45,ACCzone_cosine,'edgecolor',lineColor(isim,:),...
-%             'facecolor',lineColor(isim,:),'facealpha',0.15','linewidth',1.5)
-%         xlabel('Week');
-%         title(zoneName{izone});
-%         axis([0 46 0 1]);
-%         set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
-%         set(gca,'ytick',0:0.2:1);
-        % ---------------------------------------------
     end
 end
 
 
 
 % ----------------- INFERRED -----------------
-atm=squeeze(ACCsave(:,4,:)-ACCsave(:,1,:)); % standard-climoATM
-lnd=squeeze(ACCsave(:,4,:)-ACCsave(:,2,:)); % standard-climoLND
-ocn=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % standard-climoOCN
-sum=squeeze(atm+lnd+ocn); % atm+ocn+land
 standard=squeeze(ACCsave(:,4,:)); % standard
-ocnatm=squeeze(ACCsave(:,5,:));
-atmlnd=squeeze(ACCsave(:,6,:));
-recreated=atm+ocnatm+ocn;
+
+atmVar=squeeze(ACCsave(:,4,:)-ACCsave(:,1,:)); % standard-climoATM
+lndVar=squeeze(ACCsave(:,4,:)-ACCsave(:,2,:)); % standard-climoLND
+ocnVar=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % standard-climoOCN
+sumVar=squeeze(atmVar+lndVar+ocnVar); % atm+ocn+land
+
+lndFull=squeeze(ACCsave(:,5,:));
+ocnFull=squeeze(ACCsave(:,6,:));
+atmFull=squeeze(ACCsave(:,7,:));
+sumFull=squeeze(atmFull+lndFull+ocnFull); % atm+ocn+land
+
+allClim=squeeze(ACCsave(:,8,:));
+
 for izone=1:7
     subplot('position',subpos(izone,:))
     hold on; grid on; box on;
-    area([14 28],[1 1],'edgecolor','none','facecolor',[128 0 0]/255,...
+    
+    area([14 28],[1 1],'edgecolor','none','facecolor',[0 0 128]/255,...
         'facealpha',0.05);
-    area(1:45,sum(izone,:),'edgecolor',lineColor(4,:),'facecolor',lineColor(4,:),...
+    area([14 28],[-1 -1],'edgecolor','none','facecolor',[0 0 128]/255,...
+        'facealpha',0.05);
+    
+    area(1:45,sumVar(izone,:),'edgecolor',lineColor(4,:),'facecolor',lineColor(4,:),...
         'facealpha',0.05,'linewidth',1.5); 
-    area(1:45,lnd(izone,:),'edgecolor',lineColor(2,:),'facecolor',lineColor(2,:),...
+    area(1:45,lndVar(izone,:),'edgecolor',lineColor(2,:),'facecolor',lineColor(2,:),...
         'facealpha',0.2,'linewidth',1.5);        
-    area(1:45,atm(izone,:),'edgecolor',lineColor(1,:),'facecolor',lineColor(1,:),...
+    area(1:45,atmVar(izone,:),'edgecolor',lineColor(1,:),'facecolor',lineColor(1,:),...
         'facealpha',0.2,'linewidth',1.5);
-    area(1:45,ocn(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
+    area(1:45,ocnVar(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
         'facealpha',0.2,'linewidth',1.5);    
-    plot(1:45,ocnatm(izone,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle',':')
-    plot(1:45,atmlnd(izone,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle',':')
-    plot(1:45,recreated(izone,:),'color',lineColor(4,:),'linewidth',2.5,'linestyle',':')
-    plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',1.5)
+    
+    area(1:45,allClim(izone,:),'edgecolor',lineColor(5,:),'facecolor',lineColor(5,:),...
+        'facealpha',0.2,'linewidth',1.5);    
+    plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',2)
+
     xlabel('Week');
     title(zoneName{izone});
     axis([1.01 45 -0.1 1]); % do x=1.01 because "area" function plots y=0 at beginning
@@ -109,42 +111,32 @@ end
 
 
 % ----------------- FAKE PLOT (for legend) -----------------
-p(1)=plot([1 45],[-100 -100],'color',lineColor(1,:),'linewidth',2);
-p(2)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(3)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2); 
-p(4)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(5)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
-p(6)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(7)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
-p(8)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(1)=plot([1 45],[-100 -100],'color',[.5 .5 .5],'linewidth',2);
+p(2)=plot([1 45],[-100 -100],'color',lineColor(1,:),'linewidth',2); 
+p(3)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(4)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2); 
+p(5)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(6)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
+p(7)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(8)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
+p(9)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+p(10)=plot([1 45],[-100 -100],'color',lineColor(5,:),'linewidth',2);
+p(11)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 
-p(9)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2,'linestyle',':');
-p(10)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(11)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2,'linestyle',':');
-p(12)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(13)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2,'linestyle',':');
-p(14)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(15)=plot([1 45],[-100 -100],'color',[.5 .5 .5],'linewidth',2);
+legend(p,'\bfstandard',...
+    '\bfatmos variability','standard-climoATM',...
+    '\bfland variability','standard-climoLND',...
+    '\bfocean variability','standard-climoOCN',...
+    '\bfvariability only','sum of variability',...
+    '\bfclimatology only','climoALL',...
+    'box','off','position',[.77 .20 .2 .2]);
 
-% ----------------- ACTUAL -----------------
-% legend(p,'\bfclimoATM','(OCN+LND Predictability)',...
-%     '\bfclimoOCNclimoATM','(LND Predictability)',...
-%     '\bfclimoOCN','(ATM+LND Predictability)',...
-%     '\bfstandard','box','off','position',[.77 .25 .2 .2]);
-% ----------------- INFERRED -----------------
-legend(p,'\bfstandard-climoATM','(ATMvar)',...
-    '\bfstandard-climoLND','(LNDvar)',...
-    '\bfstandard-climoOCN','(OCNvar)',...
-    '\bfsum of solid','(ALLvar)',...
-    '\bfclimoOCNclimoATM','(LNDclim+LNDvar+...)',... 
-    '\bfclimoATMclimoLND','(OCNclim+OCNvar+...)',... 
-    '\bfrecreated','(see side text)',...
-    '\bfstandard',... 
-    'box','off','position',[.77 .18 .2 .2]);
-
-annotation('textbox',[0.02,0.13,0,0],'string','recreated=(standard-climoATM)+(climoOCNclimoATM)+(standard-climoOCN)')
-annotation('textbox',[0.02,0.1,0,0],'string','recreated=(ATMvar)+(LNDclim+LNDvar+OCNclim+ATMclim)+(OCNvar)')
-annotation('textbox',[0.02,0.07,0,0],'string','recreated=(yellow\_solid)+(green\_dash)+(blue\_solid)')
+% legend(p,'\bfstandard',...
+%     '\bfatmos full','climoOCNclimoLND',...
+%     '\bfland full','climoOCNclimoATM',...
+%     '\bfocean full','climoATMclimoLND',...
+%     '\bfclimatology only','climoALL',...
+%     'box','off','position',[.77 .20 .2 .2]);
 
 sgtitle(titleName,'fontweight','bold') 
 print(printName,'-r300','-dpng');
