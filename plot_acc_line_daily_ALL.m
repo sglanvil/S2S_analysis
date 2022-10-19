@@ -6,7 +6,7 @@ clear; clc; close all;
 var='tas_2m';
 season='DJF';
 scenarioName='scenario1';
-varOrFullOption='var';
+varOrFullOption='var2';
 titleName=sprintf('%s Surface Temperature ACC',season);
 printName=sprintf('/glade/work/sglanvil/CCR/S2S/figures/%s_ACC_line_daily_%s_ALLzones_%s',...
     var,season,varOrFullOption);
@@ -65,8 +65,10 @@ end
 
 
 % ----------------- INFERRED -----------------
+
 standard=squeeze(ACCsave(:,4,:)); % standard
 
+% first method of attaining variability
 atmVar=squeeze(ACCsave(:,4,:)-ACCsave(:,1,:)); % standard-climoATM
 lndVar=squeeze(ACCsave(:,4,:)-ACCsave(:,2,:)); % standard-climoLND
 ocnVar=squeeze(ACCsave(:,4,:)-ACCsave(:,3,:)); % standard-climoOCN
@@ -75,9 +77,15 @@ sumVar=squeeze(atmVar+lndVar+ocnVar); % atm+ocn+land
 lndFull=squeeze(ACCsave(:,5,:));
 ocnFull=squeeze(ACCsave(:,6,:));
 atmFull=squeeze(ACCsave(:,7,:));
-sumFull=squeeze(atmFull+lndFull+ocnFull); % atm+ocn+land
 
 allClim=squeeze(ACCsave(:,8,:));
+
+% second method of attaining variability
+atmVar2=atmFull-allClim;
+lndVar2=lndFull-allClim;
+ocnVar2=ocnFull-allClim;
+sumVar2=squeeze(atmVar2+lndVar2+ocnVar2); % atm2+ocn2+land2
+
 
 for izone=1:7
     subplot('position',subpos(izone,:))
@@ -97,8 +105,15 @@ for izone=1:7
     area(1:45,ocnVar(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
         'facealpha',0.2,'linewidth',1.5);    
     
-    area(1:45,allClim(izone,:),'edgecolor',lineColor(5,:),'facecolor',lineColor(5,:),...
-        'facealpha',0.2,'linewidth',1.5);    
+    area(1:45,lndVar2(izone,:),'edgecolor',lineColor(2,:),'facecolor',lineColor(2,:),...
+        'facealpha',0.2,'linewidth',2,'linestyle',':');        
+    area(1:45,atmVar2(izone,:),'edgecolor',lineColor(1,:),'facecolor',lineColor(1,:),...
+        'facealpha',0.2,'linewidth',2,'linestyle',':');     
+    area(1:45,ocnVar2(izone,:),'edgecolor',lineColor(3,:),'facecolor',lineColor(3,:),...
+        'facealpha',0.2,'linewidth',2,'linestyle',':');    
+    
+%     area(1:45,allClim(izone,:),'edgecolor',lineColor(5,:),'facecolor',lineColor(5,:),...
+%         'facealpha',0.2,'linewidth',1.5);    
     plot(1:45,standard(izone,:),'color',[.5 .5 .5],'linewidth',2)
 
     xlabel('Week');
@@ -120,16 +135,20 @@ p(6)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
 p(7)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 p(8)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2);
 p(9)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
-p(10)=plot([1 45],[-100 -100],'color',lineColor(5,:),'linewidth',2);
-p(11)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
+% p(8)=plot([1 45],[-100 -100],'color',lineColor(5,:),'linewidth',2);
+% p(9)=plot([1 45],[-100 -100],'color',[1 1 1],'linewidth',2);
 
 legend(p,'\bfstandard',...
     '\bfatmos variability','standard-climoATM',...
     '\bfland variability','standard-climoLND',...
     '\bfocean variability','standard-climoOCN',...
     '\bfvariability only','sum of variability',...
-    '\bfclimatology only','climoALL',...
     'box','off','position',[.77 .20 .2 .2]);
+
+annotation('textbox',[.04 .1 .5 .1],'string','\bfdashed = variability from another method',...
+    'edgecolor','none','verticalalignment','bottom');
+annotation('textbox',[.04 .05 .5 .1],'string','\bfdashed = dualClimoRun - climoALLRun',...
+    'edgecolor','none','verticalalignment','bottom');
 
 % legend(p,'\bfstandard',...
 %     '\bfatmos full','climoOCNclimoLND',...
