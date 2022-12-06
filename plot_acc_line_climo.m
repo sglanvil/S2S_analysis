@@ -6,10 +6,10 @@ clear; clc; close all;
 var='tas_2m';
 obsName='ERA5';
 timeAvg='daily';
-season='ALL';
+season='JJA';
 scenarioName='scenario1';
 
-titleName='Annual Mean 2m Temperature ACC (ERA5)';
+titleName='JJA 2m Temperature ACC (ERA5)';
 
 printName=...
     sprintf('%s_ACC_%s_line_%sseason_ALLzones_style3_figure',...
@@ -96,7 +96,6 @@ sumVar2=squeeze(atmVar2+lndVar2+ocnVar2); % atm2+ocn2+land2
 varAL=lndVar2-lndVar;
 varAO=ocnVar2-ocnVar;
 xxx=atmVar+varAL+varAO+lndVar+ocnVar+allClim;
-% xxx=atmVar+lndVar+ocnVar+allClim;
 
 figure
 for izone=1:7
@@ -128,7 +127,9 @@ for izone=1:7
         'facealpha',0.2,'linewidth',2,'linestyle',':');        
     plot(1:46,ocnVar2(izone,:),'color',lineColor(3,:),'linewidth',2,'linestyle',':');
     
-    plot(1:46,varAO(izone,:),'color','r','linewidth',2);
+    plot(1:46,varAL(izone,:),'color',lineColor(2,:),'linewidth',2,'linestyle','--');
+    plot(1:46,varAO(izone,:),'color',lineColor(3,:),'linewidth',2,'linestyle','--');
+    plot(1:46,xxx(izone,:),'color','r','linewidth',2);
 
 %     plot(1:46,climoLND(izone,:),'color',lineColor(2,:),'linewidth',2);        
 %     plot(1:46,climoATM(izone,:),'color',lineColor(1,:),'linewidth',2);
@@ -149,14 +150,17 @@ p(1)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2.5);
 p(2)=plot([1 45],[-100 -100],'color',lineColor(1,:),'linewidth',2); 
 p(3)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2); 
 p(4)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2);
-p(5)=plot([1 45],[-100 -100],'color','r','linewidth',2);
+p(5)=plot([1 45],[-100 -100],'color',lineColor(2,:),'linewidth',2,'linestyle','--');
+p(6)=plot([1 45],[-100 -100],'color',lineColor(3,:),'linewidth',2,'linestyle','--');
+p(7)=plot([1 45],[-100 -100],'color','r','linewidth',2);
 legend(p,'standard','atmosphere','land',...
-    'ocean','sum','box','off','position',[.77 .3 .2 .2],'fontsize',12);
-annotation('textbox',[.04 .1 .8 .1],'string','\bfMethod 1: standard - climoX (solid)',...
+    'ocean','atmos-land','atmos-ocean','sum','box','off','position',[.77 .3 .2 .2],'fontsize',12);
+annotation('textbox',[.04 .13 .8 .1],'string','\bfMethod 1: standard - climoX (solid)',...
     'edgecolor','none','verticalalignment','bottom','fontsize',12);
-annotation('textbox',[.04 .05 .8 .1],'string','\bfMethod 2: climoYclimoZ - climoALL (dashed)',...
+annotation('textbox',[.04 .08 .8 .1],'string','\bfMethod 2: climoYclimoZ - climoALL (dotted)',...
     'edgecolor','none','verticalalignment','bottom','fontsize',12);
-
+annotation('textbox',[.04 .01 .8 .1],'string','\bfSum: climoALL + V_A + V_L + V_O + I_{AL} + I_{AO}',...
+    'edgecolor','none','verticalalignment','bottom','fontsize',12);
 
 % p(1)=plot([1 45],[-100 -100],'color',lineColor(4,:),'linewidth',2.5);
 % p(2)=plot([1 45],[-100 -100],'color',lineColor(1,:),'linewidth',2); 
@@ -176,4 +180,4 @@ annotation('textbox',[.04 .05 .8 .1],'string','\bfMethod 2: climoYclimoZ - climo
 %     'edgecolor','none','verticalalignment','bottom','fontsize',12);
 
 sgtitle(titleName,'fontweight','bold') 
-% print(printName,'-r300','-dpng');
+print(printName,'-r300','-dpng');
