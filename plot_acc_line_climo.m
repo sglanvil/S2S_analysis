@@ -9,7 +9,7 @@ composite='LA'; % [ALL,DJF,JJA,EL,LA]
 timeFreq='dailySmooth'; % [daily,dailySmooth]
 scenarioName='scenario1'; % [scenario1] only
 titleName=sprintf('%s %s ACC (%s)',composite,varLong,obsName);
-printName=sprintf('%s_ACC_line_%scomposite_%s_figure',var,composite,obsName);
+printName=sprintf('%s_ACC_line_%scomposite_%s_zoomIn_figure',var,composite,obsName);
 % ------------------------- SPECIFY ABOVE -------------------------
 
 lon=0:359;
@@ -63,20 +63,44 @@ for izone=1:7
         acc=ncread(accFile,'ACC');
         clear ACCzone_cosine
         for itime=1:size(acc,3)
+            zone=zoneList{izone};
             acc0=squeeze(acc(:,:,itime));
+            cosmat=cosd(repmat(lat(:)',[length(lon) 1]));
+            cosmatzone=cosmat(eval(zone{1}),eval(zone{2}));      
+
+            maskzone=mask(eval(zone{1}),eval(zone{2}));
+            coslat_vector=cosmatzone(maskzone>0);
+            ACCzone=acc0(eval(zone{1}),eval(zone{2}));
+            acc_vector=ACCzone(maskzone>0);
+
+            if isim==4 % bootstrap resampling with replacement, 30 samples
+                for boot=1:30
+                    bootsample=randi(length(coslat_vector),round(length(coslat_vector)/10),1);
+                    coslat_boot=coslat_vector(bootsample);
+                    acc_boot=acc_vector(bootsample);
+                    acc_sample(boot)=sum(coslat_boot.*acc_boot)/sum(coslat_boot);
+                end
+                se=std(acc_sample); % standard error
+                t_crit=tinv(0.975,30);
+                ci=mean(acc_sample)+[t_crit*se -t_crit*se];
+                se_save(izone,itime)=se;
+            end
+
             acc0(mask==0)=NaN; % NaN out the ocean
             cosmask=isnan(acc0);
-            cosmat=cosd(repmat(lat(:)',[length(lon) 1]));
             cosmat(cosmask==1)=NaN;
-            zone=zoneList{izone};
-            ACCzone=acc0(eval(zone{1}),eval(zone{2}));
             cosmatzone=cosmat(eval(zone{1}),eval(zone{2}));      
+            ACCzone=acc0(eval(zone{1}),eval(zone{2}));
+
             ACCzone_cosine(itime)=sum(sum(cosmatzone.*ACCzone,1,'omitnan'),2,'omitnan')...
                 /sum(sum(cosmatzone,1,'omitnan'),2,'omitnan');
         end
         ACCsave(izone,isim,:)=ACCzone_cosine;
     end
 end
+
+
+
 
 % ----------------- first method of attaining variability -----------------
 standard=squeeze(ACCsave(:,4,:)); % standard
@@ -144,7 +168,16 @@ for izone=1:7
     area(1:46,ocnVar2(izone,:),'edgecolor','none','facecolor',lineColor(3,:),...
         'facealpha',0.2,'linewidth',2.5,'linestyle',':');        
     plot(1:46,ocnVar2(izone,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle',':');
-    
+
+%     plot(1:46,t_crit*se_save(izone,:),'r','linewidth',2)
+%     plot(1:46,-t_crit*se_save(izone,:),'r','linewidth',2)
+
+    time=1:46;
+    U6010maxLine=t_crit*se_save(izone,:)';
+    U6010minLine=-t_crit*se_save(izone,:)';
+    fill([time fliplr(time)],[U6010minLine' fliplr(U6010maxLine')],...
+        [120 120 120]/255,'facealpha',0.8,'linestyle','none');
+
 %     plot(1:46,varAL(izone,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle','--');
 %     plot(1:46,varAO(izone,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle','--');
 %     plot(1:46,xxx(izone,:),'color',[187 187 187]./255,'linewidth',2.5,'linestyle','--');
@@ -153,15 +186,12 @@ for izone=1:7
     title(zoneName{izone});
     axis([1.01 45 -0.1 0.9]); % do x=1.01 because "area" function plots y=0 at beginning
     if strcmp(var,'pr_sfc')==1
-        axis([1.01 45 -0.1 0.6]); 
-        if izone<7
-            axis([14 45 -0.08 0.16]);  
-        end
+        axis([14 45 -0.04 0.16]);  
     end
     set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
     set(gca,'ytick',0:0.2:1);
     if strcmp(var,'pr_sfc')==1
-        set(gca,'ytick',0:0.1:1);
+        set(gca,'ytick',-0.04:0.04:0.16);
     end
     set(gca,'fontsize',12);
 end
@@ -186,4 +216,4 @@ annotation('textbox',[.04 .08 .8 .1],'string','\bfMethod 2: climoYclimoZ - climo
 %     'edgecolor','none','verticalalignment','bottom','fontsize',12);
 
 sgtitle(titleName,'fontweight','bold') 
-% print(printName,'-r300','-dpng');
+print(printName,'-r300','-dpng');
