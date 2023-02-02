@@ -5,7 +5,7 @@ clear; clc; close all;
 % ------------------------- SPECIFY BELOW -------------------------
 % var='tas_2m'; varLong='2m Temperature'; obsName='ERA5';
 var='pr_sfc'; varLong='Surface Precipitation'; obsName='GPCP';
-composite='LA'; % [ALL,DJF,JJA,EL,LA]
+composite='ENSOACTIVE'; % [ALL,DJF,JJA,EL,LA]
 timeFreq='dailySmooth'; % [daily,dailySmooth]
 scenarioName='scenario1'; % [scenario1] only
 titleName=sprintf('%s %s ACC (%s)',composite,varLong,obsName);
@@ -191,7 +191,9 @@ for izone=1:7
     set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
     set(gca,'ytick',0:0.2:1);
     if strcmp(var,'pr_sfc')==1
-        set(gca,'ytick',-0.04:0.04:0.16);
+        set(gca,'ytick',-0.04:0.04:0.16,...
+            'yticklabel',{'-.04' '0' '.04' '.08' '.12' '.16'},...
+            'yticklabelrotation',10,'fontsize',8);
     end
     set(gca,'fontsize',12);
 end
