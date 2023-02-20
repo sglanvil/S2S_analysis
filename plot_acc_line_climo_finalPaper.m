@@ -28,7 +28,8 @@ subpos=[.08 .68 .20 .16; ...
     .57 .28 .20 .16; ...
     .78 .28 .20 .16; ...
     .57 .08 .20 .16; ...
-    .78 .08 .20 .16];
+    .78 .08 .20 .16; ...
+    .84 .72 .14 .12;];
 
 zoneA={'lon>190 & lon<305','lat>15 & lat<75'}; % North America (lon>190 & lon<305,lat>15 & lat<75)
 zoneB={'lon>275 & lon<330','lat>-20 & lat<15'}; % South America (lon>275 & lon<330,lat>-20 & lat<15)
@@ -146,76 +147,105 @@ for ivar=1:2
         end
     end
     
-    for izone=1:7
+    izoneEnd=7;
+    if ivar==2
+        izoneEnd=8;
+    end
+    for izone=1:izoneEnd
         icounter=icounter+1;
         subplot('position',subpos(icounter,:));
+        izonePlot=izone;
+        if izone==8
+            izonePlot=1;
+        end
         hold on; grid on; box on;
-        area([14 28],[1 1],'edgecolor','none','facecolor',[120 120 120]/255,...
-            'facealpha',0.1);
-        area([14 28],[-1 -1],'edgecolor','none','facecolor',[120 120 120]/255,...
-            'facealpha',0.1);
+        area([14 28],[1 1],'edgecolor','none','facecolor',[.5 .5 .5],...
+            'facealpha',0.2);
+        area([14 28],[-1 -1],'edgecolor','none','facecolor',[.5 .5 .5],...
+            'facealpha',0.2);
     
-        plot(1:46,standard(izone,:),'color',lineColor(4,:),'linewidth',2.5)
+        plot(0:45,standard(izonePlot,:),'color',lineColor(4,:),'linewidth',2.5)
     
-        area(1:46,lndVar(izone,:),'edgecolor','none','facecolor',lineColor(2,:),...
+        area(0:45,lndVar(izonePlot,:),'edgecolor','none','facecolor',lineColor(2,:),...
             'facealpha',0.2,'linewidth',2.5); 
-        plot(1:46,lndVar(izone,:),'color',lineColor(2,:),'linewidth',2.5);
-        area(1:46,atmVar(izone,:),'edgecolor','none','facecolor',lineColor(1,:),...
+        plot(0:45,lndVar(izonePlot,:),'color',lineColor(2,:),'linewidth',2.5);
+        area(0:45,atmVar(izonePlot,:),'edgecolor','none','facecolor',lineColor(1,:),...
             'facealpha',0.2,'linewidth',2.5);
-        plot(1:46,atmVar(izone,:),'color',lineColor(1,:),'linewidth',2.5);
-        area(1:46,ocnVar(izone,:),'edgecolor','none','facecolor',lineColor(3,:),...
+        plot(0:45,atmVar(izonePlot,:),'color',lineColor(1,:),'linewidth',2.5);
+        area(0:45,ocnVar(izonePlot,:),'edgecolor','none','facecolor',lineColor(3,:),...
             'facealpha',0.2,'linewidth',2.5);   
-        plot(1:46,ocnVar(izone,:),'color',lineColor(3,:),'linewidth',2.5);
+        plot(0:45,ocnVar(izonePlot,:),'color',lineColor(3,:),'linewidth',2.5);
         
-        area(1:46,feedbackAL(izone,:),'edgecolor','none','facecolor',lineColor(2,:),...
+        area(0:45,feedbackAL(izonePlot,:),'edgecolor','none','facecolor',lineColor(2,:),...
             'facealpha',0.2,'linewidth',2.5,'linestyle',':');        
-        plot(1:46,feedbackAL(izone,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle',':');
+        plot(0:45,feedbackAL(izonePlot,:),'color',lineColor(2,:),'linewidth',2.5,'linestyle',':');
 
-%         area(1:46,atmVar2(izone,:),'edgecolor','none','facecolor',lineColor(1,:),...
+%         area(0:45,atmVar2(izone,:),'edgecolor','none','facecolor',lineColor(1,:),...
 %             'facealpha',0.2,'linewidth',2.5,'linestyle',':');     
-%         plot(1:46,atmVar2(izone,:),'color',lineColor(1,:),'linewidth',2.5,'linestyle',':');
+%         plot(0:45,atmVar2(izone,:),'color',lineColor(1,:),'linewidth',2.5,'linestyle',':');
 
-        area(1:46,feedbackAO(izone,:),'edgecolor','none','facecolor',lineColor(3,:),...
+        area(0:45,feedbackAO(izonePlot,:),'edgecolor','none','facecolor',lineColor(3,:),...
             'facealpha',0.2,'linewidth',2.5,'linestyle',':');        
-        plot(1:46,feedbackAO(izone,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle',':');
+        plot(0:45,feedbackAO(izonePlot,:),'color',lineColor(3,:),'linewidth',2.5,'linestyle',':');
     
-        plot(1:46,total(izone,:),'color',lineColor(5,:),'linewidth',2.5,'linestyle','-');
+        plot(0:45,total(izonePlot,:),'color',lineColor(5,:),'linewidth',2.5,'linestyle','-');
     
-        time=1:46;
-        maxshade=t_crit*se_save(izone,:)';
-        minshade=-t_crit*se_save(izone,:)';
+        time=0:45;
+        maxshade=t_crit*se_save(izonePlot,:)';
+        minshade=-t_crit*se_save(izonePlot,:)';
         fill([time fliplr(time)],[minshade' fliplr(maxshade')],...
-            [.6 .6 .6],'facealpha',0.5,'linestyle','none');
+            [.5 .5 .5],'facealpha',0.5,'linestyle','none');
     
         set(gca,'ytick',0:0.2:1,'yticklabel','');
-        if izone==1 || izone==2 || izone==4 || izone==6
+        if izonePlot==1 || izonePlot==2 || izonePlot==4 || izonePlot==6
             set(gca,'ytick',0:0.2:1,'yticklabel',0:0.2:1);
             if ivar==1
                 ylabel('\bfACC');
             end
         end
         if strcmp(var,'pr_sfc')==1
-            set(gca,'ytick',-0.04:0.04:0.16);
-            if izone==1 || izone==2 || izone==4 || izone==6
+            set(gca,'ytick',-0.05:0.05:0.15);
+            if izonePlot==1 || izonePlot==2 || izonePlot==4 || izonePlot==6
                 set(gca,'ytick',-0.05:0.05:0.15,'yticklabel',-0.05:0.05:0.15);
+            end
+            if izone==8
+                set(gca,'ytick',-0.1:0.1:0.6,'yticklabel',-0.1:0.1:0.6,...
+                    'yaxislocation','left');
             end
         end
         set(gca,'xtick',0:7:70,'xticklabel','');
-        if izone==6 || izone==7
+        if izonePlot==6 || izonePlot==7
             set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
             xlabel('\bfWeek');
         end
-        title(zoneName{izone});
-        axis([1.01 45 -0.1 0.9]); % do x=1.01 because "area" function plots y=0 at beginning
+        if izone~=8
+            title(zoneName{izonePlot});
+        end
+        axis([0 45 -0.1 0.9]); % do x=1.01 because "area" function plots y=0 at beginning
         if strcmp(var,'pr_sfc')==1
-            axis([14.01 45 -0.05 0.16]);  
+            axis([14 45 -0.05 0.15]);  
+            if izone==8
+                set(gca,'xtick',0:7:70,'xticklabel',0:1:7);
+                xtickangle(0)
+                axis([0 45 -0.05 0.5]);  
+                f=[1 2 3 4];
+                v=[14 -0.05; 45 -0.05; 45 0.15; 14 0.15];
+                patch('Faces',f,'Vertices',v,'FaceColor','none','EdgeColor',[.5 .5 .5],...
+                    'linewidth',1.5);
+                x = [0.89 0.77];
+                y = [0.72 0.68];
+                annotation('line',x,y,'linewidth',1.5,'linestyle',':','color',[.5 .5 .5]);
+                x = [0.885 0.77];
+                y = [0.76 0.84];
+                annotation('line',x,y,'linewidth',1.5,'linestyle',':','color',[.5 .5 .5]);
+            end
         end
 
         if ivar==1
             text(38,0.75,['(' panelLetter{icounter} ')'],'fontweight','bold');
         end
-        if ivar==2
-            text(40,0.13,['(' panelLetter{icounter} ')'],'fontweight','bold');            
+        if ivar==2 && izone~=8
+            text(40,0.12,['(' panelLetter{icounter} ')'],'fontweight','bold');            
         end
 
         set(gca,'fontsize',10);
