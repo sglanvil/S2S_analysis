@@ -6,7 +6,7 @@ clear; clc; close all;
 % ------------------------- SPECIFY BELOW -------------------------
 var='tas_2m'; varLong='2m Temperature'; obsName='ERA5';
 % var='pr_sfc'; varLong='Surface Precipitation'; obsName='GPCP';
-composite='ALL'; % [ALL,DJF,JJA,EL,LA,ENSOACTIVE]
+composite='LA'; % [ALL,DJF,JJA,EL,LA,ENSOACTIVE]
 styleType='style2'; % [style1,style2,style3]
 timeFreq='twoWeek'; % [twoWeek] only
 titleName=sprintf('%s %s ACC (%s)',composite,varLong,obsName);
@@ -58,20 +58,21 @@ subtitleALL=cat(1,subtitle1,subtitle2,subtitle3,subtitle4);
 textboxdim=[.2 .5 .3 .3];
 weekNames={'Weeks 1-2','Weeks 3-4','Weeks 5-6'};
 
-% sourceDir='/Users/sglanvil/Documents/S2S_climo_experiments/ACC_final/';
-% fileString1=sprintf('%s_ACC_%scomposite_%s_cesm2cam6v2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-% fileString2=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoATMv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-% fileString3=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoLNDv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-% fileString4=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-% titleNames={'standard','climoATM','climoLND','climoOCN'};
-
 sourceDir='/Users/sglanvil/Documents/S2S_climo_experiments/ACC_final/';
 fileString0=sprintf('%s_ACC_%scomposite_%s_cesm2cam6v2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-fileString1=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoALLFIXv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-fileString2=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNFIXclimoLNDv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-fileString3=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNclimoATMv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-fileString4=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoALLv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
-titleNames={'climoALL','climoOCNclimoLND','climoOCNclimoATM','climoATMclimoLND'};
+fileString1=sprintf('%s_ACC_%scomposite_%s_cesm2cam6v2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+fileString2=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoATMv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+fileString3=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoLNDv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+fileString4=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+titleNames={'standard','climoATM','climoLND','climoOCN'};
+
+% sourceDir='/Users/sglanvil/Documents/S2S_climo_experiments/ACC_final/';
+% fileString0=sprintf('%s_ACC_%scomposite_%s_cesm2cam6v2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+% fileString1=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoALLFIXv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+% fileString2=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNFIXclimoLNDv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+% fileString3=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoOCNclimoATMv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+% fileString4=sprintf('%s_ACC_%scomposite_%s_cesm2cam6climoALLv2.scenario1_*sample_%s_s2s_data.nc',var,composite,timeFreq,obsName);
+% titleNames={'climoALL','climoOCNclimoLND','climoOCNclimoATM','climoATMclimoLND'};
 
 file0=dir(fullfile(sourceDir,fileString0)).name;
 file1=dir(fullfile(sourceDir,fileString1)).name;
@@ -101,6 +102,7 @@ for iweek=1:3
         % grab each week
         ACC=squeeze(ACCin(:,:,iweek));
         ACCdiff=squeeze(ACCdiffin(:,:,iweek));
+        ACCdiff(abs(ACCdiff)>1)=NaN;
         % rearrange
         ACCnew=[ACC(lon>=180 & lon<=360,:); ACC(lon>=0 & lon<180,:)];
         ACCnew(181,:)=ACCnew(182,:);
@@ -112,7 +114,7 @@ for iweek=1:3
         p=tcdf(t,n-2);        
         ACCnew(p<0.975)=NaN;
         
-        t=abs(ACCdiffnew)./sqrt((1-ACCdiffnew.^2)/(n-2));
+        t=abs(ACCdiffnew)./sqrt((1-ACCdiffnew.^2)/(n-2)); % WARNING: IMAGINARY NUMBERS?
         p=tcdf(t,n-2);    
         ACCdiffnew(p<0.975)=1; % not significantly different from standard
         ACCdiffnew(p>=0.975)=0; % yes signifciantly different from standard
@@ -121,11 +123,12 @@ for iweek=1:3
         clim([-1 1]); colormap(gradsmap)
         plot(lonCoast,latCoast,'k','linewidth',1);
 
-%         if icase>1
+        if icase>1
+            ACCdiffnew(isnan(ACCdiffnew))=1;
             mask=logical(ACCdiffnew);
             [x,y]=meshgrid(lonNew,lat);
             stipple(x,y,mask','color',[.5 .5 .5],'density',100,'markersize',2,'marker','x');
-%         end
+        end
 
         set(gca,'box','on','layer','top');
         set(gca,'xtick',-180:90:180,'xticklabel',[]);
@@ -151,4 +154,4 @@ cb=colorbar('location','southoutside','position',[.30 .1 .45 .03]);
 set(cb,'xtick',-1:0.2:1); ylabel(cb,'\bfACC','fontsize',10);
 sgtitle(titleName,'fontweight','bold') 
 set(gcf,'renderer','painters')
-print(printName,'-r300','-dpng');
+% print(printName,'-r300','-dpng');
